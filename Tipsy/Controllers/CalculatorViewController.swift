@@ -12,7 +12,9 @@ class CalculatorViewController: UIViewController {
     var tip = 0.1
     var numberOfPeople = 2
     var billTotal = 0.0
-    var finalResult = "0.0"
+    
+    
+    var calculatorBrain = CalculatorBrain()
     
     @IBOutlet weak var billTextField: UITextField!
     @IBOutlet weak var zeroPctButton: UIButton!
@@ -40,29 +42,20 @@ class CalculatorViewController: UIViewController {
     }
     
     @IBAction func calculatePressed(_ sender: UIButton) {
-        let bill = billTextField.text!
-        
-        if bill != "" {
-            
-            billTotal = Double(bill)!
-            
-            let result = billTotal * (1 + tip) / Double(numberOfPeople)
-            
-            finalResult = String(format: "%.2f", result)
-            
+        if let bill = billTextField.text, let billAmount = Double(bill) {
+            billTotal = billAmount
+            calculatorBrain.calculateSplitBill(billTotal: billTotal, tip: tip, numberOfPeople: numberOfPeople)
+            self.performSegue(withIdentifier: "goToResults", sender: self)
         }
-        self.performSegue(withIdentifier: "goToResults", sender: self)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "goToResults" {
             let destinationVC = segue.destination as! ResultsViewController
             
-            destinationVC.result = finalResult
-            destinationVC.tip = Int(tip * 100)
-            destinationVC.split = numberOfPeople
-            
+            destinationVC.result = calculatorBrain.getResult()
+            destinationVC.tip = calculatorBrain.getTip()
+            destinationVC.split = calculatorBrain.getNumberOfPeople()
         }
     }
 }
-
